@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(continuous_integration)
 
-set( CMAKE_INCLUDE_PATH "/usr/include")
-set( CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu/libncurses.so")
+#set( CMAKE_INCLUDE_PATH "/usr/include")
+#set( CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu/libncursesw.so")
+set(CURSES_NEED_NCURSES TRUE)
+set(CURSES_NEED_WIDE TRUE)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(continuous_integration main.cpp)

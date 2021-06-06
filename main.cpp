@@ -29,7 +29,7 @@ void writeState() {
         clear();
         move(0,0);
         attron(COLOR_PAIR(1));
-        printw("Hello %s",std::ctime(&end_time));
+        printw("❤ ę Hello %s",std::ctime(&end_time));
         refresh();
 
         for(int i = 0; i < 500; i++) {
@@ -42,7 +42,7 @@ void writeState() {
 }
 
 int main() {
-
+    setlocale(LC_ALL, "");
     initscr();
     timeout(-1);
     noecho();
