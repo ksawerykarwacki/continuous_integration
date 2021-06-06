@@ -1,8 +1,9 @@
-#include <curses.h>
+#include <cursesw.h>
 #include <thread>
 #include <vector>
 #include <ctime>
 #include <unistd.h>
+#include <clocale>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ void writeState() {
         clear();
         move(0,0);
         attron(COLOR_PAIR(1));
-        printw("❤ ę Hello %s",std::ctime(&end_time));
+        printw("Hello %s",std::ctime(&end_time));
         refresh();
 
         for(int i = 0; i < 500; i++) {
