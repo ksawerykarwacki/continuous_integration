@@ -7,7 +7,7 @@ set(CURSES_NEED_NCURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(continuous_integration main.cpp)
+add_executable(continuous_integration main.cpp objects/Repository.cpp objects/Repository.h objects/Agent.cpp objects/Agent.h objects/Dispatcher.cpp objects/Dispatcher.h objects/Task.cpp objects/Task.h objects/Environment.cpp objects/Environment.h)
 
 # Look for the package you want to link
 find_package( Curses REQUIRED )
