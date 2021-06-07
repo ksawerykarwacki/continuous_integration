@@ -30,3 +30,18 @@ void Dispatcher::releaseAgent(Task *task) {
     lock.unlock();
     cv.notify_all();
 }
+
+void Dispatcher::getEnvironment(Task *task) {
+    std::unique_lock<std::mutex> lock(envMtx);
+    envCv.wait(lock, [this] {
+        return environment.getTask() == nullptr;
+    });
+    environment.setTask(task);
+}
+
+void Dispatcher::releaseEnvironment() {
+    std::unique_lock<std::mutex> lock(mtx);
+    environment.setTask(nullptr);
+    lock.unlock();
+    envCv.notify_one();
+}

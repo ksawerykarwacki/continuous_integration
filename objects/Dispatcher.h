@@ -30,6 +30,8 @@ private:
 public:
     void getAgent(Task *task);
     void releaseAgent(Task *task);
+    void getEnvironment(Task *task);
+    void releaseEnvironment();
 };
 
 

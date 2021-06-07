@@ -11,21 +11,16 @@
 
 class Environment {
 private:
-    Task *task;
-    std::atomic<bool> deploying;
+    std::atomic<Task*> task;
     std::string name;
 public:
-    Environment(const std::string &name);
+    explicit Environment(const std::string &name);
 
 public:
     void setTask(Task *task);
 
-    void setDeploying(bool deploying);
-
 public:
     Task *getTask() const;
-
-    const std::atomic<bool> &getDeploying() const;
 };
 
 

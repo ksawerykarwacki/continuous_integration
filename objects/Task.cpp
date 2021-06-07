@@ -37,11 +37,11 @@ std::string Task::getStatusDescription() const {
         case starting:
             return "STARTING";
         case active:
-            return "RUNNING";
+            return "RUNNING ";
         case finished:
             return "FINISHED";
         default:
-            return "UNKNOWN";
+            return "UNKNOWN ";
     }
 }
 

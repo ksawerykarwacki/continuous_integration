@@ -19,7 +19,7 @@ void Repository::webhook() {
         }
         this->runTask(3.5, 5);
         this->runTask(12, 40, true);
-        //this->runTask(12, 60, true, true);
+        this->runTask(5, 15, true, true);
     }
 }
 
@@ -32,6 +32,7 @@ void Repository::runTask(double min, double max, bool getAgent, bool getEnv) {
         this->dispatcher.getAgent(task);
         if(getEnv) {
             this->state = waitingForDeploy;
+            this->dispatcher.getEnvironment(task);
             this->state = deploying;
         } else {
             this->state = building;
@@ -41,6 +42,9 @@ void Repository::runTask(double min, double max, bool getAgent, bool getEnv) {
 
     if(getAgent) {
         this->dispatcher.releaseAgent(task);
+        if(getEnv) {
+            this->dispatcher.releaseEnvironment();
+        }
     }
 
     this->state = idle;
@@ -87,4 +91,8 @@ double Repository::generateDuration(double min, double max) {
 
 Task *Repository::getTask() const {
     return task;
+}
+
+int Repository::getState() const {
+    return state;
 }

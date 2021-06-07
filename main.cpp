@@ -22,7 +22,7 @@ enum Views {
 
 atomic<int> view = repoView;
 atomic<unsigned long> offset = 0;
-unsigned long itemsPerPage = LINES - 4;
+unsigned long itemsPerPage = 20;
 
 int randomNumberFromRange(double start, double end) {
     double result = (double)rand() / RAND_MAX;
@@ -65,7 +65,9 @@ void listenForKey()
             }
         }
         if(c == KEY_UP) {
-            offset = max(--offset, 0UL );
+            if(offset > 0) {
+                offset--;
+            }
         }
     }
 }
@@ -75,37 +77,88 @@ void writeState() {
         auto end = std::chrono::system_clock::now();
         std::time_t end_time = std::chrono::system_clock::to_time_t(end);
         erase();
+        itemsPerPage = LINES - 5;
         move(0,0);
-        attron(COLOR_PAIR(1));
+        attron(COLOR_PAIR(2));
         printw("System working, current time: %s",std::ctime(&end_time));
         if(view == repoView) {
+            std::string text = "Repository";
+            int repoNameLength = text.size();
+            for(auto repo : repositories) {
+                repoNameLength = max(repoNameLength, (int)repo.getName().size());
+            }
+            move(2, 0);
+            text.append(repoNameLength-text.length()+1, ' ');
+            text = text + "Status";
+            text.append(COLS-text.length(), ' ');
+            attron(COLOR_PAIR(11));
+            printw(text.c_str());
             for(int i=0; i < repositories.size(); i++) {
-                move(2+i, 0);
-                printw("%s: ", repositories[i].getName().c_str());
-                printw("%s", repositories[i].getStateDescription().c_str());
-                if(repositories[i].getTask() != nullptr) {
-                    printw(" | %s", repositories[i].getTask()->getResourcesQuota().c_str());
+                move(3+i, 0);
+                attron(COLOR_PAIR(1));
+                printw("%s", repositories[i].getName().c_str());
+                move(3+i, repoNameLength + 1);
+                int state = repositories[i].getState();
+                if( state == building || state == deploying) {
+                    attron(COLOR_PAIR(3));
+                } else if (state == waitingForDeploy || state == waitingForAgent ) {
+                    attron(COLOR_PAIR(4));
+                } else {
+                    attron(COLOR_PAIR(2));
                 }
+                printw("%s", repositories[i].getStateDescription().c_str());
             }
         } else if (view == taskView) {
-            move(1, 0);
+            std::string text = "Task";
+            int taskColumnLength = text.size();
+            for(auto task : tasks) {
+                int length = task->repository->getName().size() + task->agent->getName().size()+4;
+                taskColumnLength = max(taskColumnLength, length);
+            }
+            move(2, 0);
+            text.append(taskColumnLength-text.length()+1, ' ');
+            std::string text2 = "Status";
+            text2.append(text2.length()+1, ' ');
+            std::string text3 = "Progress";
+            text3.append(text3.length()+1, ' ');
+            text += text2 + text3;
+            text.append(COLS-text.length(), ' ');
+            attron(COLOR_PAIR(11));
+            printw(text.c_str());
             for(unsigned long i=1; i<=min(itemsPerPage, tasks.size()); i++) {
                 Task *task = tasks[tasks.size()-i-offset];
-                move(1+i, 0);
-                printw("%s on ", task->repository->getName().c_str());
-                printw("%s: ", task->agent->getName().c_str());
-                printw("%s", task->getStatusDescription().c_str());
+                move(2+i, 0);
+                attron(COLOR_PAIR(1));
+                printw("%s", task->repository->getName().c_str());
+                attron(COLOR_PAIR(2));
+                printw(" on ");
+                attron(COLOR_PAIR(7));
+                printw("%s", task->agent->getName().c_str());
+                move(2+i, taskColumnLength+1);
                 if(task->getStatus() == active) {
+                    attron(COLOR_PAIR(8));
+                } else if (task->getStatus() == starting) {
+                    attron(COLOR_PAIR(10));
+                } else {
+                    attron(COLOR_PAIR(9));
+                }
+                printw(" %s ", task->getStatusDescription().c_str());
+                if(task->getStatus() == active) {
+                    move(2+i, taskColumnLength+13);
+                    attron(COLOR_PAIR(2));
                     printw(" %s of %s", task->getTime(task->getElapsed()).c_str(), task->getTime(task->duration).c_str());
                 }
             }
             move(LINES-2, 0);
+            attron(COLOR_PAIR(2));
             printw("Items %d-%d from %d", min(offset+1, getSize()), min(itemsPerPage+offset, getSize()), getSize());
         } else if (view == agentView) {
             for(int i=0; i < agents.size(); i++) {
                 move(2+i, 0);
-                printw("%s:", agents[i].getName().c_str());
-                printw("%d", agents[i].getTasks().size());
+                attron(COLOR_PAIR(7));
+                printw("%s", agents[i].getName().c_str());
+                attron(COLOR_PAIR(2));
+                printw(": %d", agents[i].getTasks().size());
                 printw(" | %s", agents[i].getResourcesStatus().c_str());
             }
         }
@@ -117,12 +170,6 @@ void writeState() {
         printw(text.c_str());
         refresh();
 
-//        for(int i = 0; i < 500; i++) {
-//            if(shouldBreak) {
-//                break;
-//            }
-//            usleep(1000);
-//        }
         usleep(1000);
     }
 }
@@ -142,6 +189,11 @@ int main() {
     init_pair(4, COLOR_YELLOW, COLOR_BLACK);
     init_pair(5, COLOR_BLUE, COLOR_BLACK);
     init_pair(6, COLOR_BLACK, COLOR_WHITE);
+    init_pair(7, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(8, COLOR_WHITE, COLOR_YELLOW);
+    init_pair(9, COLOR_WHITE, COLOR_GREEN);
+    init_pair(10, COLOR_WHITE, COLOR_BLUE);
+    init_pair(11, COLOR_BLACK, COLOR_GREEN);
 
     environment = new Environment("e2e");
     Dispatcher dispatcher = Dispatcher(tasks, agents, *environment);

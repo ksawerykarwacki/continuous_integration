@@ -31,6 +31,11 @@ private:
     static double randomNumberFromRange(double start, double end);
     double generateCpuUsage();
     double generateRamUsage();
+
+public:
+    int getState() const;
+
+private:
     double generateDuration(double min, double max);
     void runTask(double min, double max, bool getAgent = false, bool getEnv = false);
 };
