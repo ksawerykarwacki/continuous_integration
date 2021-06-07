@@ -17,34 +17,41 @@ void Repository::webhook() {
         if(shouldBreak) {
             break;
         }
-        this->state = idle;
-        this->wait(3, 5);
-        this->state = building;
-        this->wait(1.5, 4);
+        this->runTask(3.5, 5);
+        this->runTask(12, 240, true);
     }
 }
 
-void Repository::wait(double min, double max) {
-    stateCompleteness = 0;
-    double value = randomNumberFromRange(min, max) * 1000000;
-    auto steps = value / 400000 +1 ;
-    auto stepDuration = value / steps;
-    for(int i = 0; i < steps; i++)
-    {
-        if(shouldBreak)
-        {
-            break;
+void Repository::runTask(double min, double max, bool getAgent, bool getEnv) {
+    this->state = idle;
+    this->task = new Task(this, generateCpuUsage(), generateRamUsage(),
+                          generateDuration(min, max), shouldBreak);
+    if(getAgent) {
+        this->state = waitingForAgent;
+        this->dispatcher.getAgent(task);
+        if(getEnv) {
+            this->state = waitingForDeploy;
+            this->state = deploying;
+        } else {
+            this->state = building;
         }
-        usleep(stepDuration);
-        stateCompleteness = 1.0 * (i + 1) / steps * 100;
     }
+    this->task->run();
+
+    if(getAgent) {
+        this->dispatcher.releaseAgent(task);
+    }
+
+    this->state = idle;
+    this->task = nullptr;
 }
 
-Repository::Repository(string name, const bool &shouldBreak) : name(std::move(name)), shouldBreak(shouldBreak) {
+Repository::Repository(string name, const bool &shouldBreak, Dispatcher &dispatcher)
+        : name(std::move(name)), shouldBreak(shouldBreak), dispatcher(dispatcher) {
     state = idle;
 }
 
-std::string Repository::getStateDescription() {
+std::string Repository::getStateDescription() const {
     switch(this->state) {
         case idle:
             return "IDLE";
@@ -63,4 +70,16 @@ std::string Repository::getStateDescription() {
 
 const string &Repository::getName() const {
     return name;
+}
+
+double Repository::generateCpuUsage() {
+    return randomNumberFromRange(0.5, 4.0);
+}
+
+double Repository::generateRamUsage() {
+    return randomNumberFromRange(512, 8192);
+}
+
+double Repository::generateDuration(double min, double max) {
+    return randomNumberFromRange(min, max) * 1000000;
 }

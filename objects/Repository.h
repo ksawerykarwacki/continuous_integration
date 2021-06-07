@@ -7,24 +7,28 @@
 
 
 #include <string>
+#include "Task.h"
+#include "Dispatcher.h"
 
 using namespace std;
 
 class Repository {
 public:
     void webhook();
-    Repository(string name, const bool &shouldBreak);
-    string getStateDescription();
+    Repository(string name, const bool &shouldBreak, Dispatcher &dispatcher);
+    string getStateDescription() const;
     const string &getName() const;
 private:
     string name;
     int state;
-    int stateCompleteness;
+    Task *task;
+    Dispatcher& dispatcher;
     const bool& shouldBreak;
     double randomNumberFromRange(double start, double end);
-    void wait();
-
-    void wait(double min, double max);
+    double generateCpuUsage();
+    double generateRamUsage();
+    double generateDuration(double min, double max);
+    void runTask(double min, double max, bool getAgent = false, bool getEnv = false);
 };
 
 enum States {
