@@ -22,7 +22,12 @@ enum Views {
 
 atomic<int> view = repoView;
 atomic<unsigned long> offset = 0;
-unsigned long itemsPerPage = 20;
+unsigned long itemsPerPage = LINES - 4;
+
+int randomNumberFromRange(double start, double end) {
+    double result = (double)rand() / RAND_MAX;
+    return (int)(start + result * (end - start));
+}
 
 unsigned long getSize() {
     switch(view) {
@@ -69,7 +74,7 @@ void writeState() {
     while(!shouldBreak) {
         auto end = std::chrono::system_clock::now();
         std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-        clear();
+        erase();
         move(0,0);
         attron(COLOR_PAIR(1));
         printw("System working, current time: %s",std::ctime(&end_time));
@@ -78,11 +83,12 @@ void writeState() {
                 move(2+i, 0);
                 printw("%s: ", repositories[i].getName().c_str());
                 printw("%s", repositories[i].getStateDescription().c_str());
+                if(repositories[i].getTask() != nullptr) {
+                    printw(" | %s", repositories[i].getTask()->getResourcesQuota().c_str());
+                }
             }
         } else if (view == taskView) {
             move(1, 0);
-            int w = offset;
-            printw("Counter: %d", w);
             for(unsigned long i=1; i<=min(itemsPerPage, tasks.size()); i++) {
                 Task *task = tasks[tasks.size()-i-offset];
                 move(1+i, 0);
@@ -93,23 +99,31 @@ void writeState() {
                     printw(" %s of %s", task->getTime(task->getElapsed()).c_str(), task->getTime(task->duration).c_str());
                 }
             }
-            move(2+itemsPerPage, 0);
-            printw("Items %d-%d from %d", offset+1, itemsPerPage+offset, getSize());
+            move(LINES-2, 0);
+            printw("Items %d-%d from %d", min(offset+1, getSize()), min(itemsPerPage+offset, getSize()), getSize());
         } else if (view == agentView) {
             for(int i=0; i < agents.size(); i++) {
                 move(2+i, 0);
                 printw("%s:", agents[i].getName().c_str());
                 printw("%d", agents[i].getTasks().size());
+                printw(" | %s", agents[i].getResourcesStatus().c_str());
             }
         }
+
+        move(LINES-1, 0);
+        std::string text = "  Press q or ESC to exit";
+        text.append(COLS-text.length(), ' ');
+        attron(COLOR_PAIR(6));
+        printw(text.c_str());
         refresh();
 
-        for(int i = 0; i < 500; i++) {
-            if(shouldBreak) {
-                break;
-            }
-            usleep(1000);
-        }
+//        for(int i = 0; i < 500; i++) {
+//            if(shouldBreak) {
+//                break;
+//            }
+//            usleep(1000);
+//        }
+        usleep(1000);
     }
 }
 
@@ -137,14 +151,14 @@ int main() {
     threads.emplace_back(&listenForKey);
     threads.emplace_back(&writeState);
 
-    string taskNames[] = {"web", "shop", "blog", "service-desk"};
+    string taskNames[] = {"web", "shop", "blog", "service-desk", "transactions-management", "warehouse-management", "mobile-app"};
     for(auto name : taskNames) {
         repositories.emplace_back(name, shouldBreak, dispatcher);
     }
 
     string agentNames[] = {"tortuga", "haiti", "boreas", "sirocco"};
     for(auto name : agentNames) {
-        agents.emplace_back(name, 8, 12000);
+        agents.emplace_back(name, randomNumberFromRange(1, 8), randomNumberFromRange(512, 16000));
     }
 
     for(int i=0; i < repositories.size(); i++) {

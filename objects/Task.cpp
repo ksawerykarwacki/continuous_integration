@@ -64,3 +64,7 @@ std::string Task::getTime(double time) {
 
     return minutes+"m:"+seconds+"s";
 }
+
+std::string Task::getResourcesQuota() {
+    return "CPU: " + std::to_string(cpu) + " MEM: " + std::to_string(ram);
+}

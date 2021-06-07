@@ -39,3 +39,13 @@ const string &Agent::getName() const {
 const vector<Task *> &Agent::getTasks() const {
     return tasks;
 }
+
+string Agent::getResourcesStatus() {
+    double usedCpu = 0;
+    double usedRam = 0;
+    for(auto task : tasks) {
+        usedCpu += task->cpu;
+        usedRam += task->ram;
+    }
+    return "CPU: " + to_string(usedCpu) + "/" + to_string(cpu) + " MEM: " + to_string(usedRam) + "/" + to_string(ram);
+}

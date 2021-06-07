@@ -6,25 +6,19 @@
 
 void Dispatcher::getAgent(Task *task) {
     std::unique_lock<std::mutex> lock(mtx);
-    auto& ag = this->agents;
-    cv.wait(lock, [task, ag]{
+    cv.wait(lock, [task, this] {
         bool foundAgent = false;
-        for(auto a : ag) {
-            if(a.canRunTask(task)) {
-                foundAgent = true;
+        for(auto &agent : agents) {
+            foundAgent = agent.canRunTask(task);
+            if(foundAgent) {
+                agent.addTask(task);
+                task->agent = &agent;
                 break;
             }
         }
         return foundAgent;
     });
-    for(auto &a : ag) {
-        if(a.canRunTask(task)) {
-            a.addTask(task);
-            task->agent = &a;
-            tasks.push_back(task);
-            break;
-        }
-    }
+    tasks.push_back(task);
 }
 
 Dispatcher::Dispatcher(vector<Task *> &tasks, vector<Agent> &agents, Environment &environment)

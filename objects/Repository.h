@@ -21,10 +21,14 @@ public:
 private:
     string name;
     int state;
+public:
+    Task *getTask() const;
+
+private:
     Task *task;
     Dispatcher& dispatcher;
     const bool& shouldBreak;
-    double randomNumberFromRange(double start, double end);
+    static double randomNumberFromRange(double start, double end);
     double generateCpuUsage();
     double generateRamUsage();
     double generateDuration(double min, double max);

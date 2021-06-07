@@ -26,6 +26,7 @@ public:
     double getElapsed() const;
     std::string getTime(double time);
     std::string getStatusDescription() const;
+    std::string getResourcesQuota();
 private:
     const bool& shouldBreak;
     double elapsed;

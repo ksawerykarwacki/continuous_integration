@@ -18,7 +18,8 @@ void Repository::webhook() {
             break;
         }
         this->runTask(3.5, 5);
-        this->runTask(12, 240, true);
+        this->runTask(12, 40, true);
+        //this->runTask(12, 60, true, true);
     }
 }
 
@@ -82,4 +83,8 @@ double Repository::generateRamUsage() {
 
 double Repository::generateDuration(double min, double max) {
     return randomNumberFromRange(min, max) * 1000000;
+}
+
+Task *Repository::getTask() const {
+    return task;
 }
