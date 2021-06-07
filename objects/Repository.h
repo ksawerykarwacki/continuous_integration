@@ -25,12 +25,14 @@ public:
     Task *getTask() const;
 
 private:
+    int counter;
     Task *task;
     Dispatcher& dispatcher;
     const bool& shouldBreak;
     static double randomNumberFromRange(double start, double end);
     double generateCpuUsage();
     double generateRamUsage();
+    string generateJobId();
 
 public:
     int getState() const;

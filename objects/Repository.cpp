@@ -25,8 +25,12 @@ void Repository::webhook() {
 
 void Repository::runTask(double min, double max, bool getAgent, bool getEnv) {
     this->state = idle;
+    string id = "";
+    if(getAgent) {
+        id = generateJobId();
+    }
     this->task = new Task(this, generateCpuUsage(), generateRamUsage(),
-                          generateDuration(min, max), shouldBreak);
+                          generateDuration(min, max), shouldBreak, id);
     if(getAgent) {
         this->state = waitingForAgent;
         this->dispatcher.getAgent(task);
@@ -54,6 +58,7 @@ void Repository::runTask(double min, double max, bool getAgent, bool getEnv) {
 Repository::Repository(string name, const bool &shouldBreak, Dispatcher &dispatcher)
         : name(std::move(name)), shouldBreak(shouldBreak), dispatcher(dispatcher) {
     state = idle;
+    counter = 0;
 }
 
 std::string Repository::getStateDescription() const {
@@ -95,4 +100,9 @@ Task *Repository::getTask() const {
 
 int Repository::getState() const {
     return state;
+}
+
+string Repository::generateJobId() {
+    counter++;
+    return name + "#" + to_string(counter);
 }

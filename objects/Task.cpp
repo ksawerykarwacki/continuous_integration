@@ -8,10 +8,11 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <utility>
 
-Task::Task(Repository *repository, double cpu, double ram, double duration, const bool &shouldBreak)
+Task::Task(Repository *repository, double cpu, double ram, double duration, const bool &shouldBreak, std::string jobId)
         : repository(repository), cpu(cpu),
-          ram(ram), duration(duration), shouldBreak(shouldBreak) {
+          ram(ram), duration(duration), shouldBreak(shouldBreak), jobId(std::move(jobId)) {
     status = starting;
 }
 
@@ -67,4 +68,8 @@ std::string Task::getTime(double time) {
 
 std::string Task::getResourcesQuota() {
     return "CPU: " + std::to_string(cpu) + " MEM: " + std::to_string(ram);
+}
+
+const std::string &Task::getJobId() const {
+    return jobId;
 }

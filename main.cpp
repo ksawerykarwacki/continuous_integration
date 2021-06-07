@@ -84,7 +84,7 @@ void writeState() {
         if(view == repoView) {
             std::string text = "Repository";
             int repoNameLength = text.size();
-            for(auto repo : repositories) {
+            for(const auto& repo : repositories) {
                 repoNameLength = max(repoNameLength, (int)repo.getName().size());
             }
             move(2, 0);
@@ -112,7 +112,7 @@ void writeState() {
             std::string text = "Task";
             int taskColumnLength = text.size();
             for(auto task : tasks) {
-                int length = task->repository->getName().size() + task->agent->getName().size()+4;
+                int length = task->getJobId().size() + task->agent->getName().size()+4;
                 taskColumnLength = max(taskColumnLength, length);
             }
             move(2, 0);
@@ -129,7 +129,7 @@ void writeState() {
                 Task *task = tasks[tasks.size()-i-offset];
                 move(2+i, 0);
                 attron(COLOR_PAIR(1));
-                printw("%s", task->repository->getName().c_str());
+                printw("%s", task->getJobId().c_str());
                 attron(COLOR_PAIR(2));
                 printw(" on ");
                 attron(COLOR_PAIR(7));

@@ -18,7 +18,7 @@ public:
     double ram;
     double duration;
 
-    Task(Repository *repository, double cpu, double ram, double duration, const bool &shouldBreak);
+    Task(Repository *repository, double cpu, double ram, double duration, const bool &shouldBreak, std::string jobId);
     void run();
 
     int getStatus() const;
@@ -27,10 +27,14 @@ public:
     std::string getTime(double time);
     std::string getStatusDescription() const;
     std::string getResourcesQuota();
+
+    const std::string &getJobId() const;
+
 private:
     const bool& shouldBreak;
     double elapsed;
     int status;
+    std::string jobId;
 };
 
 enum Status {
