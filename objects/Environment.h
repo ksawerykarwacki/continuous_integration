@@ -14,6 +14,9 @@ private:
     std::atomic<Task*> task;
     std::string name;
 public:
+    const std::string &getName() const;
+
+public:
     explicit Environment(const std::string &name);
 
 public:

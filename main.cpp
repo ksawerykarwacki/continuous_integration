@@ -153,19 +153,67 @@ void writeState() {
             attron(COLOR_PAIR(2));
             printw("Items %d-%d from %d", min(offset+1, getSize()), min(itemsPerPage+offset, getSize()), getSize());
         } else if (view == agentView) {
+            int linesOffset = 0;
+            move(2, 0);
+            attron(COLOR_PAIR(2));
+            printw("Environment ");
+            attron(COLOR_PAIR(5));
+            printw("%s", environment->getName().c_str());
+            attron(COLOR_PAIR(2));
+            printw(": ");
+            if(environment->getTask() == nullptr) {
+                attron(COLOR_PAIR(3));
+                printw("IDLE");
+            } else {
+                attron(COLOR_PAIR(2));
+                printw("deploying ");
+                attron(COLOR_PAIR(1));
+                printw("%s", environment->getTask()->getJobId().c_str());
+            }
             for(int i=0; i < agents.size(); i++) {
-                move(2+i, 0);
+                move(4+i+linesOffset, 0);
                 attron(COLOR_PAIR(7));
                 printw("%s", agents[i].getName().c_str());
                 attron(COLOR_PAIR(2));
-                printw(": %d", agents[i].getTasks().size());
+                printw("(%d)", agents[i].getTasks().size());
                 printw(" | %s", agents[i].getResourcesStatus().c_str());
+                for(auto task : agents[i].getTasks()) {
+                    linesOffset++;
+                    move(4+i+linesOffset, 0);
+                    attron(COLOR_PAIR(2));
+                    printw(" - ");
+                    attron(COLOR_PAIR(1));
+                    printw("%s", task->getJobId().c_str());
+                    attron(COLOR_PAIR(2));
+                    printw(" | %s", task->getResourcesQuota().c_str());
+                }
             }
         }
 
         move(LINES-1, 0);
-        std::string text = "  Press q or ESC to exit";
-        text.append(COLS-text.length(), ' ');
+        vector<std::string> texts;
+        int sizeOfText = 0;
+
+        texts.push_back(" Repositories[1] ");
+        texts.push_back(" Tasks[2] ");
+        texts.push_back(" Agents[3] ");
+        texts.push_back(" Quit[q] ");
+        for(int i=0; i<texts.size(); i++) {
+            if(i==view) {
+                attron(COLOR_PAIR(11));
+            } else {
+                attron(COLOR_PAIR(6));
+            }
+            printw("%s", texts[i].c_str());
+            sizeOfText += texts[i].size();
+            if(i<texts.size()-1) {
+                attron(COLOR_PAIR(6));
+                printw("|");
+                sizeOfText++;
+            }
+        }
+        std::string text = "";
+        text.append(COLS-sizeOfText, ' ');
         attron(COLOR_PAIR(6));
         printw(text.c_str());
         refresh();

@@ -47,5 +47,7 @@ string Agent::getResourcesStatus() {
         usedCpu += task->cpu;
         usedRam += task->ram;
     }
-    return "CPU: " + to_string(usedCpu) + "/" + to_string(cpu) + " MEM: " + to_string(usedRam) + "/" + to_string(ram);
+    int freeCpu = usedCpu*100/cpu;
+    int freeRam = usedRam*100/ram;
+    return "CPU: " + to_string(freeCpu) + "% MEM: " + to_string(freeRam) + "%";
 }

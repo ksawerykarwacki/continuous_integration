@@ -13,3 +13,7 @@ void Environment::setTask(Task *task) {
 }
 
 Environment::Environment(const std::string &name) : name(name) {}
+
+const std::string &Environment::getName() const {
+    return name;
+}
