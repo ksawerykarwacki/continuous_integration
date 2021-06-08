@@ -20,12 +20,13 @@ private:
     std::vector<Agent>& agents;
     Environment& environment;
 public:
-    Dispatcher(vector<Task *> &tasks, vector<Agent> &agents, Environment &environment);
+    Dispatcher(vector<Task *> &tasks, vector<Agent> &agents, Environment &environment, mutex &mtx,
+               mutex &envMtx);
 
 private:
-    std::mutex mtx;
+    std::mutex& mtx;
     std::condition_variable cv;
-    std::mutex envMtx;
+    std::mutex& envMtx;
     std::condition_variable envCv;
 public:
     void getAgent(Task *task);

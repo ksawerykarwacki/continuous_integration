@@ -21,8 +21,9 @@ void Dispatcher::getAgent(Task *task) {
     tasks.push_back(task);
 }
 
-Dispatcher::Dispatcher(vector<Task *> &tasks, vector<Agent> &agents, Environment &environment)
-        : tasks(tasks), agents(agents), environment(environment) {}
+Dispatcher::Dispatcher(vector<Task *> &tasks, vector<Agent> &agents, Environment &environment, mutex &mtx,
+                       mutex &envMtx)
+        : tasks(tasks), agents(agents), environment(environment), mtx(mtx), envMtx(envMtx) {}
 
 void Dispatcher::releaseAgent(Task *task) {
     std::unique_lock<std::mutex> lock(mtx);

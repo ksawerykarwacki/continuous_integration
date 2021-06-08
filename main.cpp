@@ -24,6 +24,9 @@ atomic<int> view = repoView;
 atomic<unsigned long> offset = 0;
 unsigned long itemsPerPage = 20;
 
+std::mutex mtx;
+std::mutex envMtx;
+
 int randomNumberFromRange(double start, double end) {
     double result = (double)rand() / RAND_MAX;
     return (int)(start + result * (end - start));
@@ -74,6 +77,10 @@ void listenForKey()
 
 void writeState() {
     while(!shouldBreak) {
+        usleep(1000);
+
+        std::scoped_lock<std::mutex, std::mutex> lock(mtx, envMtx);
+        int localView = view.load();
         auto end = std::chrono::system_clock::now();
         std::time_t end_time = std::chrono::system_clock::to_time_t(end);
         erase();
@@ -81,7 +88,7 @@ void writeState() {
         move(0,0);
         attron(COLOR_PAIR(2));
         printw("System working, current time: %s",std::ctime(&end_time));
-        if(view == repoView) {
+        if(localView == repoView) {
             std::string text = "Repository";
             int repoNameLength = text.size();
             for(const auto& repo : repositories) {
@@ -108,7 +115,7 @@ void writeState() {
                 }
                 printw("%s", repositories[i].getStateDescription().c_str());
             }
-        } else if (view == taskView) {
+        } else if (localView == taskView) {
             std::string text = "Task";
             int taskColumnLength = text.size();
             for(auto task : tasks) {
@@ -152,7 +159,7 @@ void writeState() {
             move(LINES-2, 0);
             attron(COLOR_PAIR(2));
             printw("Items %d-%d from %d", min(offset+1, getSize()), min(itemsPerPage+offset, getSize()), getSize());
-        } else if (view == agentView) {
+        } else if (localView == agentView) {
             int linesOffset = 0;
             move(2, 0);
             attron(COLOR_PAIR(2));
@@ -199,7 +206,7 @@ void writeState() {
         texts.push_back(" Agents[3] ");
         texts.push_back(" Quit[q] ");
         for(int i=0; i<texts.size(); i++) {
-            if(i==view) {
+            if(i==localView) {
                 attron(COLOR_PAIR(11));
             } else {
                 attron(COLOR_PAIR(6));
@@ -218,7 +225,7 @@ void writeState() {
         printw(text.c_str());
         refresh();
 
-        usleep(1000);
+
     }
 }
 
@@ -244,7 +251,7 @@ int main() {
     init_pair(11, COLOR_BLACK, COLOR_GREEN);
 
     environment = new Environment("e2e");
-    Dispatcher dispatcher = Dispatcher(tasks, agents, *environment);
+    Dispatcher dispatcher = Dispatcher(tasks, agents, *environment, mtx, envMtx);
 
     vector<thread> threads;
 
