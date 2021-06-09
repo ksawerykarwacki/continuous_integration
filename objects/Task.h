@@ -6,6 +6,7 @@
 #define CONTINUOUS_INTEGRATION_TASK_H
 
 #include <string>
+#include <atomic>
 
 class Repository;
 class Agent;
@@ -32,7 +33,7 @@ public:
 
 private:
     const bool& shouldBreak;
-    double elapsed;
+    std::atomic<double> elapsed;
     int status;
     std::string jobId;
 };

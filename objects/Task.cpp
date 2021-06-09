@@ -14,11 +14,11 @@ Task::Task(Repository *repository, double cpu, double ram, double duration, cons
         : repository(repository), cpu(cpu),
           ram(ram), duration(duration), shouldBreak(shouldBreak), jobId(std::move(jobId)) {
     status = starting;
+    elapsed = 0;
 }
 
 void Task::run() {
     status = active;
-    elapsed = 0;
     auto steps = duration / 1000000 +1 ;
     auto stepDuration = duration / steps;
     for(int i = 0; i < steps; i++)
