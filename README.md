@@ -26,4 +26,4 @@ iii. Deploy phase:
   4. Task runs for defined duration.
   5. Resources on agent and lock on environment are released.
   
-iv. Back to 1.
+iv. Back to i.
